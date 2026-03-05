@@ -430,6 +430,7 @@ struct ContentView: View {
             }
             return base
         }()
+
         VStack(spacing: 0) {
             HStack(spacing: 0) {
                 Image(nsImage: musicManager.albumArt)
@@ -519,7 +520,12 @@ struct ContentView: View {
                 alignment: .center
             )
             
-            if Defaults[.enableLyricsOnClosedNotch] && !coordinator.sneakPeek.show {
+            if Defaults[.enableLyricsOnClosedNotch]
+                && !coordinator.shouldShowSneakPeek(on: vm.screenUUID)
+                && !(coordinator.expandingView.show && coordinator.expandingView.type == .music)
+                && musicManager.isPlaying
+            {
+                let lyricsWidth: CGFloat = vm.closedNotchSize.width + -cornerRadiusInsets.closed.top
                 TimelineView(.animation(minimumInterval: 0.25)) { timeline in
                     let currentElapsed: Double = {
                         guard musicManager.isPlaying else { return musicManager.elapsedTime }
@@ -533,36 +539,37 @@ struct ContentView: View {
                             return LyricsService.shared.lyricLine(at: currentElapsed)
                         }
                         let trimmed = musicManager.currentLyrics.trimmingCharacters(in: .whitespacesAndNewlines)
-                        return trimmed.isEmpty ? "No lyrics found" : trimmed.replacingOccurrences(of: "\n", with: " ")
+                        return trimmed.isEmpty ? "" : trimmed.replacingOccurrences(of: "\n", with: " ")
                     }()
                     let isPersian = line.unicodeScalars.contains { scalar in
                         let v = scalar.value
                         return v >= 0x0600 && v <= 0x06FF
                     }
-                    GeometryReader { geo in
+                    if !line.isEmpty {
                         MarqueeText(
                             line,
-                            font: .subheadline,
-                            color: musicManager.isFetchingLyrics ? .gray.opacity(0.7) : .gray,
-                            frameWidth: geo.size.width
-                        )                        
+                            font: isPersian
+                                ? .custom("Vazirmatn-Regular",
+                                          size: NSFont.preferredFont(forTextStyle: .caption2).pointSize)
+                                : .caption2,
+                            nsFont: .caption2,
+                            color: .gray,
+                            frameWidth: lyricsWidth - 8
+                        )
+                        .lineLimit(1)
+                        .frame(width: lyricsWidth, height: 14)
                     }
-                    .font(isPersian ? .custom("Vazirmatn-Regular", size: NSFont.preferredFont(forTextStyle: .subheadline).pointSize) : .subheadline)
-                    .lineLimit(1)
-                    .opacity(musicManager.isPlaying ? 1 : 0)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
                 }
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
         .frame(
-            // Based on width sizes from the inner HStack -> Album art + Rectangle Overlay + AudioSpectrumView
-            // Probably a better way to calulcate that width
-            width: scaledArtSize +
-            (vm.closedNotchSize.width + -cornerRadiusInsets.closed.top) +
-            (displayClosedNotchHeight - 12 + gestureProgress / 2),
-            // Extra height to display lyrics
-            height: Defaults[.enableLyricsOnClosedNotch] ? displayClosedNotchHeight + 16 : displayClosedNotchHeight
+            height: (Defaults[.enableLyricsOnClosedNotch] && musicManager.isPlaying)
+                ? displayClosedNotchHeight + 14
+                : displayClosedNotchHeight,
+            alignment: .center
         )
+        .animation(.smooth(duration: 0.3), value: musicManager.isPlaying)
     }
 
     @ViewBuilder
