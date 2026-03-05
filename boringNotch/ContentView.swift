@@ -546,17 +546,66 @@ struct ContentView: View {
                         return v >= 0x0600 && v <= 0x06FF
                     }
                     if !line.isEmpty {
+                        let lineHeight: CGFloat = 13
+                        let containerHeight: CGFloat = lineHeight * 2 // exactly 2 visible lines
+                        let textWidth: CGFloat = lyricsWidth - 8
+
+                        // Estimate line count to detect overflow
+                        let avgCharWidth: CGFloat = isPersian ? 8 : 6.5
+                        let charsPerLine = max(1, Int(textWidth / avgCharWidth))
+                        let estimatedLines = max(1, (line.count + charsPerLine - 1) / charsPerLine)
+                        let overflows = estimatedLines > 2
+
+                        // For >2 lines: smoothly scroll up line-by-line based on lyric progress
+                        let scrollOffset: CGFloat = {
+                            guard overflows else { return 0 }
+                            let lyrics = LyricsService.shared.syncedLyrics
+                            guard lyrics.count > 1 else { return 0 }
+                            var idx = 0
+                            for i in 0..<lyrics.count {
+                                if lyrics[i].time <= currentElapsed { idx = i } else { break }
+                            }
+                            let start = lyrics[idx].time
+                            let end = idx + 1 < lyrics.count
+                                ? lyrics[idx + 1].time
+                                : musicManager.songDuration
+                            let duration = end - start
+                            guard duration > 0 else { return 0 }
+                            let progress = (currentElapsed - start) / duration
+
+                            // Divide the lyric duration evenly among extra lines
+                            let extraLines = estimatedLines - 2
+                            // Which line-step we're on (0 = showing top, 1 = scrolled 1 line, ...)
+                            let step = Int(progress * Double(extraLines + 1))
+                            let clampedStep = min(step, extraLines)
+                            return -CGFloat(clampedStep) * lineHeight
+                        }()
+
                         Text(line)
                             .font(isPersian
                                 ? .custom("Vazirmatn-Regular",
                                           size: NSFont.preferredFont(forTextStyle: .caption1).pointSize)
                                 : .caption)
                             .foregroundStyle(.gray)
-                            .lineLimit(2)
-                            .truncationMode(.tail)
+                            .lineLimit(nil)
                             .multilineTextAlignment(.center)
-                            .frame(width: lyricsWidth - 8)
-                            .padding(.bottom, 10)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(width: textWidth, alignment: .top)
+                            .offset(y: scrollOffset)
+                            .frame(
+                                width: textWidth,
+                                height: containerHeight,
+                                alignment: estimatedLines <= 1 ? .center : .top
+                            )
+                            .clipped()
+                            .animation(.easeInOut(duration: 0.4), value: scrollOffset)
+                            .id(line)
+                            .transition(.asymmetric(
+                                insertion: .move(edge: .bottom).combined(with: .opacity),
+                                removal: .move(edge: .top).combined(with: .opacity)
+                            ))
+                            .animation(.smooth(duration: 0.4), value: line)
+                            .padding(.bottom, 6)
                     }
                 }
                 .frame(width: lyricsWidth)
