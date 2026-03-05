@@ -546,29 +546,23 @@ struct ContentView: View {
                         return v >= 0x0600 && v <= 0x06FF
                     }
                     if !line.isEmpty {
-                        MarqueeText(
-                            line,
-                            font: isPersian
+                        Text(line)
+                            .font(isPersian
                                 ? .custom("Vazirmatn-Regular",
-                                          size: NSFont.preferredFont(forTextStyle: .caption2).pointSize)
-                                : .caption2,
-                            nsFont: .caption2,
-                            color: .gray,
-                            frameWidth: lyricsWidth - 8
-                        )
-                        .lineLimit(1)
-                        .frame(width: lyricsWidth, height: 14)
+                                          size: NSFont.preferredFont(forTextStyle: .caption1).pointSize)
+                                : .caption)
+                            .foregroundStyle(.gray)
+                            .lineLimit(2)
+                            .truncationMode(.tail)
+                            .multilineTextAlignment(.center)
+                            .frame(width: lyricsWidth - 8)
+                            .padding(.bottom, 10)
                     }
                 }
+                .frame(width: lyricsWidth)
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
-        .frame(
-            height: (Defaults[.enableLyricsOnClosedNotch] && musicManager.isPlaying)
-                ? displayClosedNotchHeight + 14
-                : displayClosedNotchHeight,
-            alignment: .center
-        )
         .animation(.smooth(duration: 0.3), value: musicManager.isPlaying)
     }
 
