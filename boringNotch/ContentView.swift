@@ -546,14 +546,23 @@ struct ContentView: View {
                         return v >= 0x0600 && v <= 0x06FF
                     }
                     if !line.isEmpty {
-                        let lineHeight: CGFloat = 13
-                        let containerHeight: CGFloat = lineHeight * 2 // exactly 2 visible lines
                         let textWidth: CGFloat = lyricsWidth - 8
+                        let nsFont: NSFont = isPersian
+                            ? NSFont(name: "Vazirmatn-Regular",
+                                     size: NSFont.preferredFont(forTextStyle: .caption1).pointSize)
+                                ?? NSFont.preferredFont(forTextStyle: .caption1)
+                            : NSFont.preferredFont(forTextStyle: .caption1)
+                        let lineHeight: CGFloat = ceil(nsFont.ascender - nsFont.descender + nsFont.leading)
+                        let containerHeight: CGFloat = lineHeight * 2
 
-                        // Estimate line count to detect overflow
-                        let avgCharWidth: CGFloat = isPersian ? 8 : 6.5
-                        let charsPerLine = max(1, Int(textWidth / avgCharWidth))
-                        let estimatedLines = max(1, (line.count + charsPerLine - 1) / charsPerLine)
+                        // Measure actual rendered height to get real line count
+                        let attrs: [NSAttributedString.Key: Any] = [.font: nsFont]
+                        let boundingRect = (line as NSString).boundingRect(
+                            with: CGSize(width: textWidth, height: .greatestFiniteMagnitude),
+                            options: [.usesLineFragmentOrigin, .usesFontLeading],
+                            attributes: attrs
+                        )
+                        let estimatedLines = max(1, Int(ceil(boundingRect.height / lineHeight)))
                         let overflows = estimatedLines > 2
 
                         // For >2 lines: smoothly scroll up line-by-line based on lyric progress
