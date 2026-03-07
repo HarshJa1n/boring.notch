@@ -538,8 +538,8 @@ struct ContentView: View {
                         if !LyricsService.shared.syncedLyrics.isEmpty {
                             return LyricsService.shared.lyricLine(at: currentElapsed)
                         }
-                        let trimmed = musicManager.currentLyrics.trimmingCharacters(in: .whitespacesAndNewlines)
-                        return trimmed.isEmpty ? "" : trimmed.replacingOccurrences(of: "\n", with: " ")
+                        // Plain lyrics have no timing info — hide rather than dumping all at once
+                        return ""
                     }()
                     let isPersian = line.unicodeScalars.contains { scalar in
                         let v = scalar.value

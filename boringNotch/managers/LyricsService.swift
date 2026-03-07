@@ -272,7 +272,11 @@ class LyricsService: ObservableObject {
         let pattern = #"\[(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\]"#
         guard let regex = try? NSRegularExpression(pattern: pattern) else { return [] }
         
-        for lineSub in lrc.split(separator: "\n") {
+        // Normalize CRLF and bare CR line endings before splitting
+        let normalizedLrc = lrc
+            .replacingOccurrences(of: "\r\n", with: "\n")
+            .replacingOccurrences(of: "\r", with: "\n")
+        for lineSub in normalizedLrc.split(separator: "\n") {
             let line = String(lineSub)
             let nsLine = line as NSString
             
@@ -293,7 +297,7 @@ class LyricsService: ObservableObject {
             let time = minutes * 60 + seconds + msValue / msDivisor
             
             let textStart = match.range.location + match.range.length
-            let text = nsLine.substring(from: textStart).trimmingCharacters(in: .whitespaces)
+            let text = nsLine.substring(from: textStart).trimmingCharacters(in: .whitespacesAndNewlines)
             if !text.isEmpty {
                 result.append((time, text))
             }
