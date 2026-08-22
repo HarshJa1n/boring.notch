@@ -53,3 +53,7 @@ build/
 *.xcarchive
 *.dSYM
 
+
+# Local tooling / agent worktrees
+.claude/
+.spm-packages/
