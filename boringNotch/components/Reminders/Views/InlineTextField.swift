@@ -89,7 +89,10 @@ private final class InlineEntryPanel: NSPanel {
         hasShadow = false
         isMovable = false
         isReleasedWhenClosed = false
-        level = .mainMenu + 4
+        // Match the notch panel's own level (rather than going higher) -- orderFront()
+        // at present-time is enough to guarantee this renders above it, without pushing
+        // further into territory that risks the OS treating it as menu-bar-adjacent chrome.
+        level = .mainMenu + 3
         collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]
     }
 
@@ -110,6 +113,7 @@ private struct InlineEntryContentView: View {
             .font(.caption)
             .foregroundColor(.white)
             .padding(.horizontal, 8)
+            .frame(maxHeight: .infinity, alignment: .center)
             .focused($isFocused)
             .onSubmit(onSubmit)
             .onExitCommand(perform: onCancel)
@@ -131,7 +135,15 @@ private final class InlineEntryCoordinator: ObservableObject {
             onSubmit: onSubmit,
             onCancel: { [weak self] in self?.dismiss() }
         )
-        panel.contentView = NSHostingView(rootView: content)
+        let hosting = NSHostingView(rootView: content)
+        // Force the hosting view to the panel's exact size rather than trusting it to
+        // adopt window.contentView's autoresizing -- a plain NSHostingView assigned as
+        // contentView has, in practice, sized itself to SwiftUI's own intrinsic/fitting
+        // size instead in some configurations, which is how this ended up rendering as
+        // a much taller box than the tiny field it's supposed to sit on top of.
+        hosting.frame = CGRect(origin: .zero, size: frame.size)
+        hosting.autoresizingMask = [.width, .height]
+        panel.contentView = hosting
         panel.setFrame(frame, display: false)
         panel.orderFront(nil)
         panel.makeKey()
@@ -141,6 +153,7 @@ private final class InlineEntryCoordinator: ObservableObject {
     func updateFrame(_ frame: CGRect) {
         guard let panel, panel.isVisible else { return }
         panel.setFrame(frame, display: false)
+        panel.contentView?.frame = CGRect(origin: .zero, size: frame.size)
     }
 
     func dismiss() {

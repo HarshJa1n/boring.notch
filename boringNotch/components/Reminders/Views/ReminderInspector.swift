@@ -4,7 +4,8 @@
 //
 //  Occupies column 3 whenever the capture field is empty and a reminder is selected.
 //  Minimal tap-to-cycle controls instead of native dropdowns/pickers -- there isn't
-//  room in a 200pt-wide column for a combo box to look like anything but a mistake.
+//  room in a 200pt-wide column for a combo box (or a native DatePicker's spin-arrow
+//  field cluster) to look like anything but a mistake.
 //
 
 import SwiftUI
@@ -32,7 +33,7 @@ struct ReminderInspector: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             InlineTextField(text: $title, placeholder: "Title", onSubmit: save)
                 .frame(height: 20)
 
@@ -46,31 +47,41 @@ struct ReminderInspector: View {
             }
 
             if hasDueDate {
-                DatePicker("", selection: $dueDate, displayedComponents: hasTime ? [.date, .hourAndMinute] : [.date])
-                    .datePickerStyle(.compact)
-                    .labelsHidden()
-                    .font(.system(size: 10))
-                    .fixedSize()
-                    .onChange(of: dueDate) { _, _ in save() }
-            }
-
-            if manager.lists.count > 1 {
-                listRow
+                dateStepperRow
             }
 
             Spacer(minLength: 0)
 
-            Button {
-                Task { await manager.delete(reminder) }
-            } label: {
-                HStack(spacing: 3) {
-                    Image(systemName: "trash")
-                    Text("Delete")
+            HStack(spacing: 6) {
+                ForEach(manager.lists, id: \.id) { list in
+                    Button {
+                        listID = list.id
+                        save()
+                    } label: {
+                        Circle()
+                            .fill(Color(list.color))
+                            .frame(width: 10, height: 10)
+                            .overlay(
+                                Circle()
+                                    .strokeBorder(Color.white, lineWidth: listID == list.id ? 1.5 : 0)
+                                    .padding(-2)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .help(list.title)
                 }
-                .font(.system(size: 10))
-                .foregroundColor(.red.opacity(0.8))
+
+                Spacer(minLength: 0)
+
+                Button {
+                    Task { await manager.delete(reminder) }
+                } label: {
+                    Image(systemName: "trash")
+                        .font(.system(size: 10))
+                        .foregroundColor(.red.opacity(0.8))
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
         .padding(.top, 2)
         .onDisappear(perform: save)
@@ -84,8 +95,8 @@ struct ReminderInspector: View {
         }
     }
 
-    // Tap cycles: no date -> today -> tomorrow's date stays editable via the DatePicker
-    // that appears once a date exists; tapping again while a date is set clears it.
+    // Tap cycles: no date -> today; tapping again while a date is set clears it. The
+    // day itself is then adjusted with the stepper below rather than a native DatePicker.
     private var dueDateChip: some View {
         Button {
             hasDueDate.toggle()
@@ -129,25 +140,51 @@ struct ReminderInspector: View {
         .buttonStyle(.plain)
     }
 
-    private var listRow: some View {
-        HStack(spacing: 5) {
-            ForEach(manager.lists, id: \.id) { list in
-                Button {
-                    listID = list.id
-                    save()
-                } label: {
-                    Circle()
-                        .fill(Color(list.color))
-                        .frame(width: 10, height: 10)
-                        .overlay(
-                            Circle()
-                                .strokeBorder(Color.white, lineWidth: listID == list.id ? 1.5 : 0)
-                                .padding(-2)
-                        )
-                }
-                .buttonStyle(.plain)
-                .help(list.title)
+    // Compact day-stepper instead of a native DatePicker, which renders as a chunky
+    // multi-field spin-arrow control that dwarfs everything else in a 200pt column.
+    private var dateStepperRow: some View {
+        HStack(spacing: 6) {
+            Button { adjustDate(by: -1) } label: {
+                Image(systemName: "chevron.left")
             }
+            .buttonStyle(.plain)
+
+            Text(formattedDate)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundColor(.white)
+                .frame(minWidth: 78)
+
+            Button { adjustDate(by: 1) } label: {
+                Image(systemName: "chevron.right")
+            }
+            .buttonStyle(.plain)
+
+            if hasTime {
+                Stepper("", onIncrement: { adjustTime(by: 30) }, onDecrement: { adjustTime(by: -30) })
+                    .labelsHidden()
+                    .scaleEffect(0.7)
+            }
+        }
+        .foregroundColor(Color(white: 0.7))
+    }
+
+    private var formattedDate: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = hasTime ? "MMM d, h:mm a" : "MMM d, yyyy"
+        return formatter.string(from: dueDate)
+    }
+
+    private func adjustDate(by days: Int) {
+        if let newDate = Calendar.current.date(byAdding: .day, value: days, to: dueDate) {
+            dueDate = newDate
+            save()
+        }
+    }
+
+    private func adjustTime(by minutes: Int) {
+        if let newDate = Calendar.current.date(byAdding: .minute, value: minutes, to: dueDate) {
+            dueDate = newDate
+            save()
         }
     }
 
@@ -162,4 +199,3 @@ struct ReminderInspector: View {
         Task { await manager.update(updated) }
     }
 }
-

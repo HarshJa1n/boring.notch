@@ -106,9 +106,11 @@ final class RemindersManager: ObservableObject {
         }
     }
 
+    // Newest-created first, per Harsh's preference: the item you just added should
+    // show up at the top of its group, not get buried below older undated reminders.
     private static func creationOrder(_ lhs: ReminderModel, _ rhs: ReminderModel) -> Bool {
         switch (lhs.creationDate, rhs.creationDate) {
-        case let (l?, r?): return l < r
+        case let (l?, r?): return l > r
         case (nil, nil): return lhs.title < rhs.title
         case (nil, _): return false
         case (_, nil): return true
