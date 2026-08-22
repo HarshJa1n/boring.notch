@@ -9,7 +9,6 @@ import SwiftUI
 
 struct ReminderCaptureField: View {
     @ObservedObject var manager: RemindersManager
-    @FocusState.Binding var isFocused: Bool
     @State private var text: String = ""
 
     private var parseResult: ReminderParseResult? {
@@ -19,18 +18,8 @@ struct ReminderCaptureField: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            TextField("Type a reminder…", text: $text)
-                .textFieldStyle(.plain)
-                .font(.caption)
-                .foregroundColor(.white)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 6)
-                .background(
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(Color.white.opacity(0.08))
-                )
-                .focused($isFocused)
-                .onSubmit(commit)
+            InlineTextField(text: $text, placeholder: "Type a reminder…", autoFocus: true, onSubmit: commit)
+                .frame(height: 26)
 
             if let parseResult, !parseResult.chips.isEmpty {
                 HStack(spacing: 4) {

@@ -19,7 +19,6 @@ struct ReminderInspector: View {
     @State private var hasTime: Bool
     @State private var priority: ReminderPriority
     @State private var listID: String
-    @FocusState private var isTitleFocused: Bool
 
     init(manager: RemindersManager, reminder: ReminderModel) {
         self.manager = manager
@@ -34,20 +33,8 @@ struct ReminderInspector: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            TextField("Title", text: $title)
-                .textFieldStyle(.plain)
-                .font(.caption)
-                .foregroundColor(.white)
-                .focused($isTitleFocused)
-                .onSubmit(save)
-                .onChange(of: isTitleFocused) { _, focused in
-                    if focused {
-                        SharingStateManager.shared.beginInteraction()
-                    } else {
-                        SharingStateManager.shared.endInteraction()
-                        save()
-                    }
-                }
+            InlineTextField(text: $title, placeholder: "Title", onSubmit: save)
+                .frame(height: 20)
 
             HStack(spacing: 6) {
                 dueDateChip
@@ -86,6 +73,7 @@ struct ReminderInspector: View {
             .buttonStyle(.plain)
         }
         .padding(.top, 2)
+        .onDisappear(perform: save)
         .onChange(of: reminder.id) { _, _ in
             title = reminder.title
             hasDueDate = reminder.dueDate != nil
