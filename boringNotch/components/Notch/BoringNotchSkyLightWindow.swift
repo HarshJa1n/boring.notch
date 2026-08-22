@@ -33,6 +33,13 @@ extension SkyLightOperator {
 
 class BoringNotchSkyLightWindow: NSPanel {
     private var isSkyLightEnabled: Bool = false
+
+    /// The panel is non-key by default so it never steals focus from whatever app the user
+    /// was using. Text entry (e.g. the Reminders capture field) needs the opposite for the
+    /// moment it's focused, so callers flip this on/off around that window instead of the
+    /// panel accepting key status all the time. `.nonactivatingPanel` in the style mask
+    /// means becoming key here does not activate this app or foreground its other windows.
+    var wantsKeyForTextInput: Bool = false
     
     override init(
         contentRect: NSRect,
@@ -146,6 +153,6 @@ class BoringNotchSkyLightWindow: NSPanel {
         }
     }
     
-    override var canBecomeKey: Bool { false }
+    override var canBecomeKey: Bool { wantsKeyForTextInput }
     override var canBecomeMain: Bool { false }
 }

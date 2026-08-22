@@ -7,11 +7,14 @@
 
 import EventKit
 import SwiftUI
+import SwiftUIIntrospect
 
 struct RemindersView: View {
+    @EnvironmentObject var vm: BoringViewModel
     @ObservedObject var manager = RemindersManager.shared
     @ObservedObject var sharing = SharingStateManager.shared
     @FocusState private var isCaptureFocused: Bool
+    @State private var hostWindow: NSWindow?
 
     private var selectedReminder: ReminderModel? {
         guard let id = manager.selectedID else { return nil }
@@ -28,8 +31,17 @@ struct RemindersView: View {
                 }
             }
         }
+        .introspect(.window, on: .macOS(.v14, .v15)) { window in
+            hostWindow = window
+        }
         .onAppear {
             Task { await manager.refresh() }
+            DispatchQueue.main.async {
+                isCaptureFocused = true
+            }
+        }
+        .onDisappear {
+            vm.isHoveringCalendar = false
         }
         .onChange(of: isCaptureFocused) { _, focused in
             if focused {
@@ -37,6 +49,27 @@ struct RemindersView: View {
             } else {
                 sharing.endInteraction()
             }
+        }
+        // The notch panel is deliberately non-key so it never steals focus from whatever
+        // app the user is using. A text field can't accept keystrokes in a non-key window,
+        // so while any Reminders text entry is active we flip the panel key just for that
+        // window (it's a nonactivating panel, so this doesn't foreground the app), then
+        // hand key status back the moment entry ends.
+        .onChange(of: sharing.preventNotchClose) { _, wantsKey in
+            guard let panel = hostWindow as? BoringNotchSkyLightWindow else { return }
+            if wantsKey {
+                panel.wantsKeyForTextInput = true
+                panel.makeKey()
+            } else {
+                panel.resignKey()
+                panel.wantsKeyForTextInput = false
+            }
+        }
+        // Scrolling inside these columns fires the same scroll-wheel monitor used to
+        // detect the swipe-up-to-close gesture (see ContentView.handleUpGesture); the
+        // calendar view on the Home tab guards it the same way with isHoveringCalendar.
+        .onHover { hovering in
+            vm.isHoveringCalendar = hovering
         }
     }
 

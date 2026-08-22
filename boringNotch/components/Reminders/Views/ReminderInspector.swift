@@ -3,6 +3,8 @@
 //  boringNotch
 //
 //  Occupies column 3 whenever the capture field is empty and a reminder is selected.
+//  Minimal tap-to-cycle controls instead of native dropdowns/pickers -- there isn't
+//  room in a 200pt-wide column for a combo box to look like anything but a mistake.
 //
 
 import SwiftUI
@@ -17,6 +19,7 @@ struct ReminderInspector: View {
     @State private var hasTime: Bool
     @State private var priority: ReminderPriority
     @State private var listID: String
+    @FocusState private var isTitleFocused: Bool
 
     init(manager: RemindersManager, reminder: ReminderModel) {
         self.manager = manager
@@ -30,58 +33,57 @@ struct ReminderInspector: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 8) {
             TextField("Title", text: $title)
                 .textFieldStyle(.plain)
                 .font(.caption)
                 .foregroundColor(.white)
+                .focused($isTitleFocused)
                 .onSubmit(save)
+                .onChange(of: isTitleFocused) { _, focused in
+                    if focused {
+                        SharingStateManager.shared.beginInteraction()
+                    } else {
+                        SharingStateManager.shared.endInteraction()
+                        save()
+                    }
+                }
 
-            Toggle("Due date", isOn: $hasDueDate)
-                .toggleStyle(.checkbox)
-                .font(.system(size: 10))
+            HStack(spacing: 6) {
+                dueDateChip
+                if hasDueDate {
+                    timeChip
+                }
+                Spacer(minLength: 0)
+                priorityChip
+            }
 
             if hasDueDate {
                 DatePicker("", selection: $dueDate, displayedComponents: hasTime ? [.date, .hourAndMinute] : [.date])
                     .datePickerStyle(.compact)
                     .labelsHidden()
                     .font(.system(size: 10))
-
-                Toggle("Include time", isOn: $hasTime)
-                    .toggleStyle(.checkbox)
-                    .font(.system(size: 10))
+                    .fixedSize()
+                    .onChange(of: dueDate) { _, _ in save() }
             }
-
-            Picker("Priority", selection: $priority) {
-                Text("None").tag(ReminderPriority.none)
-                Text("Low !").tag(ReminderPriority.low)
-                Text("Medium !!").tag(ReminderPriority.medium)
-                Text("High !!!").tag(ReminderPriority.high)
-            }
-            .font(.system(size: 10))
 
             if manager.lists.count > 1 {
-                Picker("List", selection: $listID) {
-                    ForEach(manager.lists, id: \.id) { list in
-                        Text(list.title).tag(list.id)
-                    }
-                }
-                .font(.system(size: 10))
+                listRow
             }
 
             Spacer(minLength: 0)
 
-            HStack {
-                Button("Delete", role: .destructive) {
-                    Task { await manager.delete(reminder) }
+            Button {
+                Task { await manager.delete(reminder) }
+            } label: {
+                HStack(spacing: 3) {
+                    Image(systemName: "trash")
+                    Text("Delete")
                 }
                 .font(.system(size: 10))
-
-                Spacer()
-
-                Button("Save", action: save)
-                    .font(.system(size: 10, weight: .semibold))
+                .foregroundColor(.red.opacity(0.8))
             }
+            .buttonStyle(.plain)
         }
         .padding(.top, 2)
         .onChange(of: reminder.id) { _, _ in
@@ -94,6 +96,73 @@ struct ReminderInspector: View {
         }
     }
 
+    // Tap cycles: no date -> today -> tomorrow's date stays editable via the DatePicker
+    // that appears once a date exists; tapping again while a date is set clears it.
+    private var dueDateChip: some View {
+        Button {
+            hasDueDate.toggle()
+            if hasDueDate && dueDate < Date() {
+                dueDate = Date()
+            }
+            save()
+        } label: {
+            HStack(spacing: 3) {
+                Image(systemName: "calendar")
+                Text(hasDueDate ? "Due" : "No date")
+            }
+            .chipStyle(active: hasDueDate)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var timeChip: some View {
+        Button {
+            hasTime.toggle()
+            save()
+        } label: {
+            HStack(spacing: 3) {
+                Image(systemName: "clock")
+                Text(hasTime ? "Time" : "All-day")
+            }
+            .chipStyle(active: hasTime)
+        }
+        .buttonStyle(.plain)
+    }
+
+    // Single button, tap-tap-tap cycles priority: none -> low -> medium -> high -> none.
+    private var priorityChip: some View {
+        Button {
+            priority = priority.next
+            save()
+        } label: {
+            Text(priority == .none ? "!" : priority.symbol)
+                .chipStyle(active: priority != .none, tint: .orange)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var listRow: some View {
+        HStack(spacing: 5) {
+            ForEach(manager.lists, id: \.id) { list in
+                Button {
+                    listID = list.id
+                    save()
+                } label: {
+                    Circle()
+                        .fill(Color(list.color))
+                        .frame(width: 10, height: 10)
+                        .overlay(
+                            Circle()
+                                .strokeBorder(Color.white, lineWidth: listID == list.id ? 1.5 : 0)
+                                .padding(-2)
+                        )
+                }
+                .buttonStyle(.plain)
+                .help(list.title)
+            }
+        }
+    }
+
     private func save() {
         guard let list = manager.lists.first(where: { $0.id == listID }) ?? Optional(reminder.list) else { return }
         var updated = reminder
@@ -103,5 +172,29 @@ struct ReminderInspector: View {
         updated.priority = priority
         updated.list = list
         Task { await manager.update(updated) }
+    }
+}
+
+private extension ReminderPriority {
+    var next: ReminderPriority {
+        switch self {
+        case .none: return .low
+        case .low: return .medium
+        case .medium: return .high
+        case .high: return .none
+        }
+    }
+}
+
+private extension View {
+    func chipStyle(active: Bool, tint: Color = .white) -> some View {
+        self
+            .font(.system(size: 9, weight: .medium))
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .background(
+                Capsule().fill(active ? tint.opacity(0.25) : Color.white.opacity(0.08))
+            )
+            .foregroundColor(active ? tint.opacity(0.95) : Color(white: 0.65))
     }
 }
