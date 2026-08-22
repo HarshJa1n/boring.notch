@@ -244,7 +244,16 @@ extension Defaults.Keys {
     static let hideAllDayEvents = Key<Bool>("hideAllDayEvents", default: false)
     static let showFullEventTitles = Key<Bool>("showFullEventTitles", default: false)
     static let autoScrollToNextEvent = Key<Bool>("autoScrollToNextEvent", default: true)
-    
+
+    // MARK: Reminders
+    static let enableRemindersTab = Key<Bool>("enableRemindersTab", default: true)
+    static let reminderTimeWindow = Key<ReminderTimeWindow>("reminderTimeWindow", default: .thisWeek)
+    static let reminderListSelection = Key<CalendarSelectionState>("reminderListSelection", default: .all)
+    static let defaultReminderList = Key<String?>("defaultReminderList", default: nil)
+    static let showCompletedReminders = Key<Bool>("showCompletedReminders", default: false)
+    static let remindersDefaultTime = Key<Int>("remindersDefaultTime", default: 9)
+    static let openRemindersTabByDefault = Key<Bool>("openRemindersTabByDefault", default: false)
+
     // MARK: Fullscreen Media Detection
     static let hideNotchOption = Key<HideNotchOption>("hideNotchOption", default: .nowPlayingOnly)
     

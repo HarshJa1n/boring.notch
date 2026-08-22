@@ -7,6 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FB71E6AEE71347D595E4812E /* EventStoreProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 107BC2FB977C4D6CB1D3FA62 /* EventStoreProvider.swift */; };
+		4FD07DC64CB94CE0A2076505 /* RemindersServiceProviding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E088EC3450E42A3A789595B /* RemindersServiceProviding.swift */; };
+		9F0C69B9C2574065A1890937 /* ReminderModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6D4E516ABDC49628C6690EB /* ReminderModel.swift */; };
+		AEB615FF5B88462DAC146C8B /* RemindersManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B1D8FC25D140838D989530 /* RemindersManager.swift */; };
+		5FD5A75D96A04CBAAD52B654 /* ReminderNLParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 452F6A1CFDA747DD962123DF /* ReminderNLParser.swift */; };
+		D2A43EFB98934D3F8A44BD1C /* RemindersSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C165DCEFE2334D07B53BA85D /* RemindersSettingsView.swift */; };
+		F34426B40E084801858EF649 /* ReminderRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6588593547C42E8B0FA5809 /* ReminderRow.swift */; };
+		F679E8DB3EA34FB29EBDD4D1 /* ReminderToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EAFECA8AFB745E68D83A086 /* ReminderToggle.swift */; };
+		516ECB9755EF4CC5B15112A4 /* ReminderColumn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61C66C55C9A0417BA0A07C3A /* ReminderColumn.swift */; };
+		7E20A9050ADD45C7B230F1BB /* ReminderCaptureField.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE31F138425A43F49157D6A1 /* ReminderCaptureField.swift */; };
+		08BDC7D50B0A490EB91F248B /* ReminderInspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 780B4F373C5345DA9705720A /* ReminderInspector.swift */; };
+		12AAB15DFF6F443489D674E8 /* RemindersEmptyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC7C610B0F3D458B96519CFB /* RemindersEmptyState.swift */; };
+		6FAD6AD697154FCE955DCE97 /* RemindersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 254788C1F1E7401EA16736F0 /* RemindersView.swift */; };
 		1100290C2E847E2800035A57 /* NSItemProvider+LoadHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1100290B2E847E2800035A57 /* NSItemProvider+LoadHelpers.swift */; };
 		110029272E84FD4C00035A57 /* TemporaryFileStorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 110029262E84FD4C00035A57 /* TemporaryFileStorageService.swift */; };
 		1100292A2E8691B400035A57 /* FileShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 110029292E8691B400035A57 /* FileShareView.swift */; };
@@ -196,6 +209,19 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		107BC2FB977C4D6CB1D3FA62 /* EventStoreProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventStoreProvider.swift; sourceTree = "<group>"; };
+		1E088EC3450E42A3A789595B /* RemindersServiceProviding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemindersServiceProviding.swift; sourceTree = "<group>"; };
+		B6D4E516ABDC49628C6690EB /* ReminderModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderModel.swift; sourceTree = "<group>"; };
+		87B1D8FC25D140838D989530 /* RemindersManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemindersManager.swift; sourceTree = "<group>"; };
+		452F6A1CFDA747DD962123DF /* ReminderNLParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderNLParser.swift; sourceTree = "<group>"; };
+		C165DCEFE2334D07B53BA85D /* RemindersSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemindersSettingsView.swift; sourceTree = "<group>"; };
+		C6588593547C42E8B0FA5809 /* ReminderRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderRow.swift; sourceTree = "<group>"; };
+		2EAFECA8AFB745E68D83A086 /* ReminderToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderToggle.swift; sourceTree = "<group>"; };
+		61C66C55C9A0417BA0A07C3A /* ReminderColumn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderColumn.swift; sourceTree = "<group>"; };
+		EE31F138425A43F49157D6A1 /* ReminderCaptureField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderCaptureField.swift; sourceTree = "<group>"; };
+		780B4F373C5345DA9705720A /* ReminderInspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderInspector.swift; sourceTree = "<group>"; };
+		FC7C610B0F3D458B96519CFB /* RemindersEmptyState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemindersEmptyState.swift; sourceTree = "<group>"; };
+		254788C1F1E7401EA16736F0 /* RemindersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemindersView.swift; sourceTree = "<group>"; };
 		1100290B2E847E2800035A57 /* NSItemProvider+LoadHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSItemProvider+LoadHelpers.swift"; sourceTree = "<group>"; };
 		110029262E84FD4C00035A57 /* TemporaryFileStorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryFileStorageService.swift; sourceTree = "<group>"; };
 		110029292E8691B400035A57 /* FileShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileShareView.swift; sourceTree = "<group>"; };
@@ -468,6 +494,8 @@
 		116398942DF5D6B40052E6AF /* Providers */ = {
 			isa = PBXGroup;
 			children = (
+				1E088EC3450E42A3A789595B /* RemindersServiceProviding.swift */,
+				107BC2FB977C4D6CB1D3FA62 /* EventStoreProvider.swift */,
 				116398952DF5D6C00052E6AF /* CalendarServiceProviding.swift */,
 			);
 			path = Providers;
@@ -525,6 +553,7 @@
 		11DB26722EDD0CDF001EA0CF /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				C165DCEFE2334D07B53BA85D /* RemindersSettingsView.swift */,
 				11DB26672EDD0CDF001EA0CF /* AboutView.swift */,
 				11DB26682EDD0CDF001EA0CF /* AdvancedSettingsView.swift */,
 				11DB26692EDD0CDF001EA0CF /* AppearanceSettingsView.swift */,
@@ -552,6 +581,7 @@
 		14288DD92C6E015000B9F80C /* helpers */ = {
 			isa = PBXGroup;
 			children = (
+				452F6A1CFDA747DD962123DF /* ReminderNLParser.swift */,
 				118EBE242E92DCCB00D54B5A /* AssociatedObject.swift */,
 				11A45C782E34E63100CEB175 /* MediaChecker.swift */,
 				1153BD972D9881F900979FB0 /* AppleScriptHelper.swift */,
@@ -583,6 +613,7 @@
 		1471639B2C5D362F0068B555 /* components */ = {
 			isa = PBXGroup;
 			children = (
+				57A2910E24DF498DBD271247 /* Reminders */,
 				11985BDF2F37A3C800F81585 /* OSD */,
 				B141C23B2CA5F50900AC8CC8 /* Onboarding */,
 				14C08BB72C8DE49E000F8AA0 /* Calendar */,
@@ -604,6 +635,7 @@
 		147163B52C5D804B0068B555 /* managers */ = {
 			isa = PBXGroup;
 			children = (
+				87B1D8FC25D140838D989530 /* RemindersManager.swift */,
 				11DB26652EDD0BE1001EA0CF /* LyricsService.swift */,
 				11D58EA12E760AE100FA8377 /* ImageService.swift */,
 				F38DE6472D8243E2008B5C6D /* BatteryActivityManager.swift */,
@@ -722,6 +754,7 @@
 		14D570C72C5F38760011E668 /* models */ = {
 			isa = PBXGroup;
 			children = (
+				B6D4E516ABDC49628C6690EB /* ReminderModel.swift */,
 				11F748812ECB07A400F841DB /* MusicControlButton.swift */,
 				118D1FD02E98FF5F00A2FF63 /* SharingStateManager.swift */,
 				1163988E2DF5CC870052E6AF /* CalendarModel.swift */,
@@ -840,6 +873,28 @@
 				B186543B2C6F49AE000B926A /* ShortcutConstants.swift */,
 			);
 			path = Shortcuts;
+			sourceTree = "<group>";
+		};
+		BA88A5676B164FB38AEA13D3 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				C6588593547C42E8B0FA5809 /* ReminderRow.swift */,
+				2EAFECA8AFB745E68D83A086 /* ReminderToggle.swift */,
+				61C66C55C9A0417BA0A07C3A /* ReminderColumn.swift */,
+				EE31F138425A43F49157D6A1 /* ReminderCaptureField.swift */,
+				780B4F373C5345DA9705720A /* ReminderInspector.swift */,
+				FC7C610B0F3D458B96519CFB /* RemindersEmptyState.swift */,
+				254788C1F1E7401EA16736F0 /* RemindersView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		57A2910E24DF498DBD271247 /* Reminders */ = {
+			isa = PBXGroup;
+			children = (
+				BA88A5676B164FB38AEA13D3 /* Views */,
+			);
+			path = Reminders;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -993,6 +1048,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FB71E6AEE71347D595E4812E /* EventStoreProvider.swift in Sources */,
+				4FD07DC64CB94CE0A2076505 /* RemindersServiceProviding.swift in Sources */,
+				9F0C69B9C2574065A1890937 /* ReminderModel.swift in Sources */,
+				AEB615FF5B88462DAC146C8B /* RemindersManager.swift in Sources */,
+				5FD5A75D96A04CBAAD52B654 /* ReminderNLParser.swift in Sources */,
+				D2A43EFB98934D3F8A44BD1C /* RemindersSettingsView.swift in Sources */,
+				F34426B40E084801858EF649 /* ReminderRow.swift in Sources */,
+				F679E8DB3EA34FB29EBDD4D1 /* ReminderToggle.swift in Sources */,
+				516ECB9755EF4CC5B15112A4 /* ReminderColumn.swift in Sources */,
+				7E20A9050ADD45C7B230F1BB /* ReminderCaptureField.swift in Sources */,
+				08BDC7D50B0A490EB91F248B /* ReminderInspector.swift in Sources */,
+				12AAB15DFF6F443489D674E8 /* RemindersEmptyState.swift in Sources */,
+				6FAD6AD697154FCE955DCE97 /* RemindersView.swift in Sources */,
 				115C12EC2ED3D003009754CA /* OpenNotchOSD.swift in Sources */,
 				14C08BB92C8DE4B1000F8AA0 /* BoringCalendar.swift in Sources */,
 				5955950D2E900ED800C66711 /* ApplicationRelauncher.swift in Sources */,
@@ -1340,9 +1408,11 @@
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "This app uses AppleEvents to control music";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "This app uses the calendar to display your calendar events";
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "This app uses the calendar to display your calendar events";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app uses the camera to display a live camera view";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSRemindersUsageDescription = "This app uses Reminders to display your scheduled reminder in the calendar";
+				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "This app uses Reminders to create, edit, and sync your reminders";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -1393,9 +1463,11 @@
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "This app uses AppleEvents to control music";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "This app uses the calendar to display your calendar events";
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "This app uses the calendar to display your calendar events";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app uses the camera to display a live camera view";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSRemindersUsageDescription = "This app uses Reminders to display your scheduled reminder in the calendar";
+				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "This app uses Reminders to create, edit, and sync your reminders";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

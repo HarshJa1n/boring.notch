@@ -34,6 +34,9 @@ struct SettingsView: View {
                 NavigationLink(value: "Calendar") {
                     Label("Calendar", systemImage: "calendar")
                 }
+                NavigationLink(value: "Reminders") {
+                    Label("Reminders", systemImage: "checklist")
+                }
                 NavigationLink(value: "OSD") {
                     Label("OSD", systemImage: "dial.medium.fill")
                 }
@@ -68,6 +71,8 @@ struct SettingsView: View {
                     Media()
                 case "Calendar":
                     CalendarSettings()
+                case "Reminders":
+                    RemindersSettings()
                 case "OSD":
                     OSDSettings()
                 case "Battery":
