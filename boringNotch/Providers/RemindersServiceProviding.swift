@@ -182,7 +182,8 @@ extension ReminderModel {
             isCompleted: reminder.isCompleted,
             priority: .init(ekPriority: reminder.priority),
             list: .init(from: calendar),
-            recurrence: reminder.hasRecurrenceRules ? RecurrenceSummary(text: "Repeats") : nil
+            recurrence: reminder.hasRecurrenceRules ? RecurrenceSummary(text: "Repeats") : nil,
+            creationDate: reminder.creationDate
         )
     }
 }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CD3A91A5031F483DAEE6EE63 /* ReminderChipStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC37A90B66244CCA1B5B7B3 /* ReminderChipStyle.swift */; };
 		976AF694DC444F81BF6D5A1E /* InlineTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4662708D812477294CECEFB /* InlineTextField.swift */; };
 		FB71E6AEE71347D595E4812E /* EventStoreProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 107BC2FB977C4D6CB1D3FA62 /* EventStoreProvider.swift */; };
 		4FD07DC64CB94CE0A2076505 /* RemindersServiceProviding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E088EC3450E42A3A789595B /* RemindersServiceProviding.swift */; };
@@ -210,6 +211,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		BEC37A90B66244CCA1B5B7B3 /* ReminderChipStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderChipStyle.swift; sourceTree = "<group>"; };
 		A4662708D812477294CECEFB /* InlineTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineTextField.swift; sourceTree = "<group>"; };
 		107BC2FB977C4D6CB1D3FA62 /* EventStoreProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventStoreProvider.swift; sourceTree = "<group>"; };
 		1E088EC3450E42A3A789595B /* RemindersServiceProviding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemindersServiceProviding.swift; sourceTree = "<group>"; };
@@ -888,7 +890,8 @@
 				FC7C610B0F3D458B96519CFB /* RemindersEmptyState.swift */,
 				254788C1F1E7401EA16736F0 /* RemindersView.swift */,
 			
-				A4662708D812477294CECEFB /* InlineTextField.swift */,);
+				A4662708D812477294CECEFB /* InlineTextField.swift */,
+				BEC37A90B66244CCA1B5B7B3 /* ReminderChipStyle.swift */,);
 			path = Views;
 			sourceTree = "<group>";
 		};
@@ -1051,6 +1054,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CD3A91A5031F483DAEE6EE63 /* ReminderChipStyle.swift in Sources */,
 				976AF694DC444F81BF6D5A1E /* InlineTextField.swift in Sources */,
 				FB71E6AEE71347D595E4812E /* EventStoreProvider.swift in Sources */,
 				4FD07DC64CB94CE0A2076505 /* RemindersServiceProviding.swift in Sources */,

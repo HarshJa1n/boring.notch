@@ -35,15 +35,36 @@ private struct ScreenFrameReader: NSViewRepresentable {
 
     final class TrackingView: NSView {
         var onFrameChange: ((CGRect) -> Void)?
+        private var settleTimer: Timer?
 
         override func viewDidMoveToWindow() {
             super.viewDidMoveToWindow()
             reportFrame()
+            scheduleSettleCorrections()
         }
 
         override func layout() {
             super.layout()
             reportFrame()
+        }
+
+        // The notch's tab-switch/open transition animates via SwiftUI transitions
+        // (scale + opacity), which macOS implements as a Core Animation transform on the
+        // presentation layer -- it doesn't trigger a fresh AppKit layout pass, so a frame
+        // read at the moment this view appears can be mid-transition and stale. Rather than
+        // guess the transition's exact duration, keep re-reading the real frame for a short
+        // window after appearing so the backing panel snaps to the final, settled position.
+        private func scheduleSettleCorrections() {
+            settleTimer?.invalidate()
+            var ticks = 0
+            let timer = Timer(timeInterval: 0.04, repeats: true) { [weak self] timer in
+                guard let self else { timer.invalidate(); return }
+                self.reportFrame()
+                ticks += 1
+                if ticks >= 15 { timer.invalidate() }
+            }
+            RunLoop.main.add(timer, forMode: .common)
+            settleTimer = timer
         }
 
         func reportFrame() {
@@ -99,8 +120,7 @@ private struct InlineEntryContentView: View {
 @MainActor
 private final class InlineEntryCoordinator: ObservableObject {
     private var panel: InlineEntryPanel?
-
-    var isPresented: Bool { panel?.isVisible ?? false }
+    @Published var isPresented = false
 
     func present(text: Binding<String>, placeholder: String, frame: CGRect, onSubmit: @escaping () -> Void) {
         let panel = self.panel ?? InlineEntryPanel()
@@ -115,6 +135,7 @@ private final class InlineEntryCoordinator: ObservableObject {
         panel.setFrame(frame, display: false)
         panel.orderFront(nil)
         panel.makeKey()
+        isPresented = true
     }
 
     func updateFrame(_ frame: CGRect) {
@@ -125,6 +146,7 @@ private final class InlineEntryCoordinator: ObservableObject {
     func dismiss() {
         panel?.resignKey()
         panel?.orderOut(nil)
+        isPresented = false
     }
 }
 
@@ -133,6 +155,8 @@ private final class InlineEntryCoordinator: ObservableObject {
 /// `text`; tapping it opens the backing panel positioned exactly on top, so typing looks
 /// and feels inline even though the real first responder lives in a different window.
 struct InlineTextField: View {
+    @EnvironmentObject var vm: BoringViewModel
+    @ObservedObject private var notchCoordinator = BoringViewCoordinator.shared
     @Binding var text: String
     var placeholder: String = ""
     var autoFocus: Bool = false
@@ -145,11 +169,15 @@ struct InlineTextField: View {
         ZStack(alignment: .leading) {
             RoundedRectangle(cornerRadius: 6)
                 .fill(Color.white.opacity(0.08))
+            // Hidden while the backing panel is presented so there's only ever one
+            // visible copy of the text, even if the overlay is a frame or two off
+            // from settling into its final position.
             Text(text.isEmpty ? placeholder : text)
                 .font(.caption)
                 .foregroundColor(text.isEmpty ? Color(white: 0.5) : .white)
                 .lineLimit(1)
                 .padding(.horizontal, 8)
+                .opacity(coordinator.isPresented ? 0 : 1)
         }
         .background(
             ScreenFrameReader { frame in
@@ -172,6 +200,19 @@ struct InlineTextField: View {
         }
         .onDisappear {
             coordinator.dismiss()
+        }
+        // Dismiss the instant the notch starts closing rather than waiting for this
+        // SwiftUI view's own onDisappear, which only fires after the close transition
+        // finishes -- otherwise the (separate, real) panel visibly outlives the collapse.
+        .onChange(of: vm.notchState) { _, state in
+            if state == .closed {
+                coordinator.dismiss()
+            }
+        }
+        .onChange(of: notchCoordinator.currentView) { _, newView in
+            if newView != .reminders {
+                coordinator.dismiss()
+            }
         }
     }
 

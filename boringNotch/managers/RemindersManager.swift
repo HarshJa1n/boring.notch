@@ -99,10 +99,19 @@ final class RemindersManager: ObservableObject {
             return !lhs.isCompleted
         }
         switch (lhs.dueDate, rhs.dueDate) {
+        case (nil, nil): return creationOrder(lhs, rhs)
+        case (nil, _): return false
+        case (_, nil): return true
+        case let (l?, r?): return l == r ? creationOrder(lhs, rhs) : l < r
+        }
+    }
+
+    private static func creationOrder(_ lhs: ReminderModel, _ rhs: ReminderModel) -> Bool {
+        switch (lhs.creationDate, rhs.creationDate) {
+        case let (l?, r?): return l < r
         case (nil, nil): return lhs.title < rhs.title
         case (nil, _): return false
         case (_, nil): return true
-        case let (l?, r?): return l == r ? lhs.priority.rawValue < rhs.priority.rawValue : l < r
         }
     }
 

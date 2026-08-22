@@ -3,6 +3,8 @@
 //  boringNotch
 //
 //  Always-on capture field: type, press Return, it appends. No "+" button.
+//  Parsed date/time/priority are shown as editable chips before committing, so a
+//  misread date or an unwanted default can be fixed before the reminder is created.
 //
 
 import SwiftUI
@@ -11,9 +13,27 @@ struct ReminderCaptureField: View {
     @ObservedObject var manager: RemindersManager
     @State private var text: String = ""
 
+    @State private var dueDateOverride: Date?
+    @State private var dateManuallyCleared = false
+    @State private var hasTimeOverride: Bool?
+    @State private var priorityOverride: ReminderPriority?
+
     private var parseResult: ReminderParseResult? {
         guard !text.trimmingCharacters(in: .whitespaces).isEmpty else { return nil }
         return ReminderNLParser.parse(text)
+    }
+
+    private var effectiveDueDate: Date? {
+        if dateManuallyCleared { return nil }
+        return dueDateOverride ?? parseResult?.dueDate
+    }
+
+    private var effectiveHasTime: Bool {
+        hasTimeOverride ?? parseResult?.hasTime ?? false
+    }
+
+    private var effectivePriority: ReminderPriority {
+        priorityOverride ?? parseResult?.priority ?? .none
     }
 
     var body: some View {
@@ -21,35 +41,91 @@ struct ReminderCaptureField: View {
             InlineTextField(text: $text, placeholder: "Type a reminder…", autoFocus: true, onSubmit: commit)
                 .frame(height: 26)
 
-            if let parseResult, !parseResult.chips.isEmpty {
-                HStack(spacing: 4) {
-                    ForEach(parseResult.chips, id: \.self) { chip in
-                        Text(chip)
-                            .font(.system(size: 9, weight: .medium))
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 2)
-                            .background(Capsule().fill(Color.white.opacity(0.1)))
-                            .foregroundColor(Color(white: 0.75))
+            if parseResult != nil {
+                HStack(spacing: 6) {
+                    dueDateChip
+                    if effectiveDueDate != nil {
+                        timeChip
                     }
+                    Spacer(minLength: 0)
+                    priorityChip
                 }
                 .transition(.opacity.combined(with: .move(edge: .top)))
-                .animation(StandardAnimations.interactive, value: parseResult.chips)
+                .animation(StandardAnimations.interactive, value: parseResult?.chips)
+
+                if let recurrence = parseResult?.recurrenceText {
+                    Text(recurrence)
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundColor(Color(white: 0.6))
+                }
             }
         }
+    }
+
+    private var dueDateChip: some View {
+        Button {
+            if effectiveDueDate != nil {
+                dateManuallyCleared = true
+                dueDateOverride = nil
+            } else {
+                dateManuallyCleared = false
+                dueDateOverride = Date()
+            }
+        } label: {
+            HStack(spacing: 3) {
+                Image(systemName: "calendar")
+                Text(effectiveDueDate.map(chipDateLabel) ?? "No date")
+            }
+            .chipStyle(active: effectiveDueDate != nil)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var timeChip: some View {
+        Button {
+            hasTimeOverride = !effectiveHasTime
+        } label: {
+            HStack(spacing: 3) {
+                Image(systemName: "clock")
+                Text(effectiveHasTime ? "Time" : "All-day")
+            }
+            .chipStyle(active: effectiveHasTime)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var priorityChip: some View {
+        Button {
+            priorityOverride = effectivePriority.next
+        } label: {
+            Text(effectivePriority == .none ? "!" : effectivePriority.symbol)
+                .chipStyle(active: effectivePriority != .none, tint: .orange)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func chipDateLabel(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = effectiveHasTime ? "EEE d MMM, h:mm a" : "EEE d MMM"
+        return formatter.string(from: date)
     }
 
     private func commit() {
         guard let result = parseResult, !result.title.isEmpty else { return }
         let draft = ReminderDraft(
             title: result.title,
-            dueDate: result.dueDate,
-            hasTime: result.hasTime,
-            priority: result.priority,
+            dueDate: effectiveDueDate,
+            hasTime: effectiveHasTime,
+            priority: effectivePriority,
             list: nil,
             notes: nil,
             recurrenceRuleText: result.recurrenceText
         )
         text = ""
+        dueDateOverride = nil
+        dateManuallyCleared = false
+        hasTimeOverride = nil
+        priorityOverride = nil
         Task {
             await manager.create(draft)
         }

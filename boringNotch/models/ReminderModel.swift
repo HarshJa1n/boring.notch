@@ -46,6 +46,7 @@ struct ReminderModel: Identifiable, Equatable {
     var priority: ReminderPriority
     var list: CalendarModel
     var recurrence: RecurrenceSummary?
+    var creationDate: Date?
 }
 
 struct ReminderDraft {
