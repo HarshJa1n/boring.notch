@@ -57,3 +57,6 @@ build/
 # Local tooling / agent worktrees
 .claude/
 .spm-packages/
+
+# Local release artifacts
+*.dmg
