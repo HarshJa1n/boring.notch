@@ -65,8 +65,10 @@ if [ -d "${RENAMED_APP_PATH}/Contents/Frameworks" ]; then
     done
 fi
 
-# Sign the entire app bundle
-codesign --force --deep --sign - "${RENAMED_APP_PATH}"
+# Sign the entire app bundle, preserving entitlements (sandbox, reminders, calendars, etc.)
+# -- a plain `--force --deep --sign -` with no --entitlements strips them entirely, which
+# silently breaks TCC-gated features like Reminders/Calendar access in the shipped app.
+codesign --force --deep --sign - --entitlements "boringNotch/boringNotch.entitlements" "${RENAMED_APP_PATH}"
 echo "✅ App re-signed successfully"
 
 echo "📦 Creating DMG..."
