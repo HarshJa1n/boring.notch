@@ -14,7 +14,10 @@ struct ReminderCaptureField: View {
     @State private var text: String = ""
 
     @State private var dueDateOverride: Date?
-    @State private var dateManuallyCleared = false
+    // The specific parsed date the user cleared, so a *different* date parsed from further
+    // typing shows up instead of staying suppressed for the rest of the draft (a plain
+    // sticky "cleared" flag couldn't tell those two situations apart).
+    @State private var clearedParsedDate: Date?
     @State private var hasTimeOverride: Bool?
     @State private var priorityOverride: ReminderPriority?
 
@@ -24,7 +27,9 @@ struct ReminderCaptureField: View {
     }
 
     private var effectiveDueDate: Date? {
-        if dateManuallyCleared { return nil }
+        if dueDateOverride == nil, let cleared = clearedParsedDate, cleared == parseResult?.dueDate {
+            return nil
+        }
         return dueDateOverride ?? parseResult?.dueDate
     }
 
@@ -65,10 +70,10 @@ struct ReminderCaptureField: View {
     private var dueDateChip: some View {
         Button {
             if effectiveDueDate != nil {
-                dateManuallyCleared = true
+                clearedParsedDate = parseResult?.dueDate
                 dueDateOverride = nil
             } else {
-                dateManuallyCleared = false
+                clearedParsedDate = nil
                 dueDateOverride = Date()
             }
         } label: {
@@ -123,7 +128,7 @@ struct ReminderCaptureField: View {
         )
         text = ""
         dueDateOverride = nil
-        dateManuallyCleared = false
+        clearedParsedDate = nil
         hasTimeOverride = nil
         priorityOverride = nil
         Task {

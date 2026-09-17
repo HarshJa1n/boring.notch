@@ -27,6 +27,7 @@ class CalendarManager: ObservableObject {
     private let calendarService = CalendarService()
 
     private var eventStoreChangedObserver: NSObjectProtocol?
+    private var reloadDebounce: Task<Void, Never>?
 
     private init() {
         self.currentWeekStartDate = CalendarManager.startOfDay(Date())
@@ -43,14 +44,26 @@ class CalendarManager: ObservableObject {
     }
 
     private func setupEventStoreChangedObserver() {
+        // Debounced like RemindersManager's own listener on the same shared EKEventStore --
+        // without this, a single reminder toggle/create/delete on the Reminders tab triggers
+        // a full, redundant calendars+reminderLists refetch here on every individual event.
         eventStoreChangedObserver = NotificationCenter.default.addObserver(
             forName: .EKEventStoreChanged,
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            Task {
-                await self?.reloadCalendarAndReminderLists()
+            Task { @MainActor in
+                self?.scheduleDebouncedReload()
             }
+        }
+    }
+
+    private func scheduleDebouncedReload() {
+        reloadDebounce?.cancel()
+        reloadDebounce = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(300))
+            guard !Task.isCancelled else { return }
+            await self?.reloadCalendarAndReminderLists()
         }
     }
 

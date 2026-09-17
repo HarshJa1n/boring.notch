@@ -127,7 +127,7 @@ enum ReminderNLParser {
                     .trimmingCharacters(in: .whitespacesAndNewlines)
                 if !leftover.isEmpty {
                     dueDate = date
-                    hasTime = detectorMatchHasTime(match)
+                    hasTime = detectorMatchHasTime(match, matchedText: String(remaining[matchRange]))
                     remaining.removeSubrange(matchRange)
                 }
             }
@@ -154,12 +154,18 @@ enum ReminderNLParser {
         )
     }
 
-    private static func detectorMatchHasTime(_ match: NSTextCheckingResult) -> Bool {
-        // NSDataDetector doesn't expose granularity directly; a duration or a match with an
-        // associated timeZone/duration component reliably indicates a time was present.
-        // Text-level check is the pragmatic signal here.
+    private static func detectorMatchHasTime(_ match: NSTextCheckingResult, matchedText: String) -> Bool {
+        // NSDataDetector doesn't expose granularity directly. Deriving "has a time" purely from
+        // the resulting hour/minute being non-zero misreads an explicitly-stated midnight (or
+        // "12:00am") as "no time" -- check the matched text itself for an explicit time marker
+        // first, since that can't be confused with a date that simply resolved to 00:00.
+        if match.duration > 0 { return true }
+        let lowered = matchedText.lowercased()
+        if lowered.contains("midnight") || lowered.contains("noon") { return true }
+        if lowered.range(of: #"\d{1,2}(:\d{2})?\s*(am|pm)\b"#, options: .regularExpression) != nil { return true }
+        if lowered.contains(":") { return true }
         guard let date = match.date else { return false }
         let components = Calendar.current.dateComponents([.hour, .minute], from: date)
-        return match.duration > 0 || components.hour != 0 || components.minute != 0
+        return components.hour != 0 || components.minute != 0
     }
 }

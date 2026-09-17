@@ -9,7 +9,11 @@ import Defaults
 import SwiftUI
 
 struct TabModel: Identifiable {
-    let id = UUID()
+    // Identity follows the semantic tab (`view`), not a random UUID -- `tabs` below is a
+    // computed property re-evaluated on every body pass, and a fresh UUID per evaluation
+    // would break `matchedGeometryEffect`'s ability to track the selection capsule across
+    // renders (SwiftUI would see every tab as newly-inserted instead of unchanged).
+    var id: NotchViews { view }
     let label: String
     let icon: String
     let view: NotchViews
@@ -18,13 +22,14 @@ struct TabModel: Identifiable {
 struct TabSelectionView: View {
     @ObservedObject var coordinator = BoringViewCoordinator.shared
     @Default(.enableRemindersTab) var enableRemindersTab
+    @Default(.boringShelf) var boringShelf
     @Namespace var animation
 
     private var tabs: [TabModel] {
-        var tabs = [
-            TabModel(label: "Home", icon: "house.fill", view: .home),
-            TabModel(label: "Shelf", icon: "tray.fill", view: .shelf)
-        ]
+        var tabs = [TabModel(label: "Home", icon: "house.fill", view: .home)]
+        if boringShelf {
+            tabs.append(TabModel(label: "Shelf", icon: "tray.fill", view: .shelf))
+        }
         if enableRemindersTab {
             tabs.append(TabModel(label: "Reminders", icon: "checklist", view: .reminders))
         }

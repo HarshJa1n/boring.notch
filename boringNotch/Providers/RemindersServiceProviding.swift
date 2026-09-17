@@ -134,6 +134,14 @@ final class RemindersService: RemindersServiceProviding {
             ekReminder.dueDateComponents = nil
         }
 
+        // Replace any existing alarms rather than leaving them untouched -- otherwise editing
+        // a timed reminder's due date/time leaves the original alarm firing at the stale time,
+        // and clearing the due date entirely leaves an orphaned alarm behind.
+        ekReminder.alarms?.forEach { ekReminder.removeAlarm($0) }
+        if let dueDate = reminder.dueDate, reminder.hasTime {
+            ekReminder.addAlarm(EKAlarm(absoluteDate: dueDate))
+        }
+
         if let ekList = store.calendars(for: .reminder).first(where: { $0.calendarIdentifier == reminder.list.id }) {
             ekReminder.calendar = ekList
         }

@@ -153,7 +153,12 @@ final class RemindersManager: ObservableObject {
         do {
             try await service.setCompleted(id: reminder.id, completed: newValue)
         } catch {
-            reminders[index].isCompleted = !newValue
+            // Re-resolve the index rather than reusing the one captured before the await --
+            // a debounced refresh() triggered by the .EKEventStoreChanged this save posted
+            // may have already replaced `reminders` with a differently-sized/ordered array.
+            if let currentIndex = reminders.firstIndex(where: { $0.id == reminder.id }) {
+                reminders[currentIndex].isCompleted = !newValue
+            }
         }
     }
 
@@ -176,7 +181,9 @@ final class RemindersManager: ObservableObject {
         do {
             try await service.update(reminder)
         } catch {
-            reminders[index] = previous
+            if let currentIndex = reminders.firstIndex(where: { $0.id == reminder.id }) {
+                reminders[currentIndex] = previous
+            }
         }
     }
 
@@ -186,7 +193,12 @@ final class RemindersManager: ObservableObject {
         do {
             try await service.delete(id: reminder.id)
         } catch {
-            reminders.insert(removed, at: min(index, reminders.count))
+            // Re-append and re-sort rather than reinserting at the stale captured index --
+            // `reminders` may have been replaced entirely by a concurrent refresh() by now.
+            if !reminders.contains(where: { $0.id == removed.id }) {
+                reminders.append(removed)
+                reminders.sort(by: Self.sortOrder)
+            }
         }
     }
 }

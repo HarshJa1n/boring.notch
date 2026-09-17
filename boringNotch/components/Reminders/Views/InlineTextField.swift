@@ -195,7 +195,15 @@ struct InlineTextField: View {
         .background(
             ScreenFrameReader { frame in
                 screenFrame = frame
-                coordinator.updateFrame(frame)
+                if coordinator.isPresented {
+                    coordinator.updateFrame(frame)
+                } else if autoFocus && frame != .zero {
+                    // The single async-hop `present()` in onAppear can fire before this
+                    // reader's settle-correction timer has reported a real frame, in which
+                    // case it silently no-ops (see `present()` below) and nothing else would
+                    // ever retry it -- catch that here once a non-zero frame actually arrives.
+                    present()
+                }
             }
         )
         .contentShape(Rectangle())
